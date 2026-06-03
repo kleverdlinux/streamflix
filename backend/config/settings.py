@@ -111,10 +111,7 @@ SIMPLE_JWT = {
 }
 
 # ─── CORS ───────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://localhost:5173'
-).split(',')
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # ─── Static / Media ────────────────────────────────────────
