@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, User, LogOut, Settings, Shield, ChevronDown, X, Play, Menu, Film, Heart, Sparkles, Grid3X3 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
@@ -8,6 +8,8 @@ import api from '../services/api';
 export default function Navbar() {
   const { user, isAdmin, logout, openAuthModal } = useAuthStore();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isAdminPage = pathname.startsWith('/admin');
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,15 +91,17 @@ export default function Navbar() {
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-          {/* ── Hamburger button (mobile only) ── */}
-          <button
-            className="md:hidden p-2 rounded-lg transition-colors"
-            style={{ color: 'rgba(240,240,255,0.7)' }}
-            onClick={() => setMobileOpen(true)}
-            aria-label="Abrir menú"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* ── Hamburger button (mobile only, hidden on admin pages since admin has its own) ── */}
+          {!isAdminPage && (
+            <button
+              className="md:hidden p-2 rounded-lg transition-colors"
+              style={{ color: 'rgba(240,240,255,0.7)' }}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Abrir menú"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          )}
 
           {/* ── Logo ── */}
           <Link to={user ? '/catalog' : '/'} className="flex items-center gap-3 shrink-0 hover:opacity-90 transition-opacity">
@@ -290,9 +294,9 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* User menu / Auth */}
+            {/* User menu / Auth — hidden on mobile (hamburger menu has everything) */}
             {user ? (
-              <div ref={menuRef} className="relative">
+              <div ref={menuRef} className="relative hidden md:block">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all duration-200"
