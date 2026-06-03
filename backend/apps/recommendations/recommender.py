@@ -8,13 +8,15 @@ import os
 import logging
 import threading
 import numpy as np
-import pandas as pd
 import joblib
 from django.conf import settings
 from django.db import connection
-from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
+
+# En Render (plan gratuito 512MB), no podemos cargar sklearn y pandas
+# porque crashean por falta de memoria.
+IS_RENDER = os.getenv('RENDER') is not None
 
 
 class RecommenderService:
@@ -73,6 +75,14 @@ class RecommenderService:
 
     def _load_content_based(self):
         """Load TF-IDF, metadata, compute cosine similarity matrix."""
+        if IS_RENDER:
+            logger.warning("Render env: Skipping TF-IDF to save RAM.")
+            self.cosine_sim_matrix = None
+            return
+
+        import pandas as pd
+        from sklearn.metrics.pairwise import cosine_similarity
+
         metadata_path = os.path.join(self.ml_path, 'movies_metadata.csv')
         tfidf_path = os.path.join(self.ml_path, 'tfidf_vectorizer.pkl')
         indices_path = os.path.join(self.ml_path, 'movie_indices.pkl')
@@ -125,6 +135,11 @@ class RecommenderService:
 
     def _load_decision_tree(self):
         """Load decision tree and label encoders."""
+        if IS_RENDER:
+            logger.warning("Render env: Skipping decision tree to save RAM.")
+            self.decision_tree = None
+            return
+
         dt_path = os.path.join(self.ml_path, 'decision_tree.pkl')
         le_path = os.path.join(self.ml_path, 'label_encoders.pkl')
 
@@ -192,7 +207,7 @@ class RecommenderService:
         Content-based recommendations using cosine similarity.
         Returns list of (db_movie_id, similarity_score) tuples.
         """
-        if not self.loaded:
+        if not self.loaded or getattr(self, 'cosine_sim_matrix', None) is None:
             return []
 
         if movielens_id not in self.movie_id_to_idx:
@@ -253,8 +268,10 @@ class RecommenderService:
         Use decision tree to predict probability user will like a movie.
         Returns float [0-1].
         """
-        if not self.loaded:
+        if not self.loaded or getattr(self, 'decision_tree', None) is None:
             return 0.5
+            
+        import pandas as pd
 
         # Get movie movielens_id
         ml_id = self.db_to_movielens.get(db_movie_id)
