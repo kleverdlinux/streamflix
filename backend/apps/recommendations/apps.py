@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -11,15 +10,9 @@ class RecommendationsConfig(AppConfig):
     label = 'recommendations'
 
     def ready(self):
-        """Initialize the RecommenderService singleton when Django starts."""
-        # Skip initialization during common management commands to avoid database queries on startup
-        if 'manage.py' in sys.argv and any(cmd in sys.argv for cmd in ['migrate', 'collectstatic', 'makemigrations', 'check', 'test']):
-            logger.info("RecommenderService initialization skipped during management command.")
-            return
-
-        try:
-            from .recommender import RecommenderService
-            RecommenderService.get_instance()
-            logger.info("RecommenderService initialized successfully.")
-        except Exception as e:
-            logger.error(f"Failed to initialize RecommenderService: {e}")
+        """
+        RecommenderService will be loaded lazily on the first API request
+        via RecommenderService.get_instance() to save memory at startup.
+        This is critical for free-tier hosting with 512MB RAM limits.
+        """
+        logger.info("RecommendationsConfig ready. ML models will load on first request.")
