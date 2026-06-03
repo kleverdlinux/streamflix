@@ -22,22 +22,43 @@ export function Header() {
     setIsScrolled(latest > 50)
   })
 
-  const handleNavLinkClick = (e, href) => {
+  const handleNavLinkClick = (e, href, fromMobile = false) => {
     if (window.location.pathname === '/') {
       if (href.startsWith('/#')) {
+        e.preventDefault();
         const id = href.replace('/#', '');
-        const element = document.getElementById(id);
-        if (element) {
-          e.preventDefault();
-          element.scrollIntoView({ behavior: 'smooth' });
-          window.history.pushState(null, '', href);
+        
+        // Close mobile menu first, then scroll after a short delay
+        if (fromMobile) {
+          setIsMobileMenuOpen(false);
+          setTimeout(() => {
+            const element = document.getElementById(id);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth' });
+              window.history.pushState(null, '', href);
+            }
+          }, 350);
+        } else {
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+            window.history.pushState(null, '', href);
+          }
         }
       } else if (href === '/') {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (fromMobile) {
+          setIsMobileMenuOpen(false);
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 350);
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
         window.history.pushState(null, '', '/');
       }
     }
+    // If not on '/', let React Router handle the navigation normally
   };
 
   return (
@@ -125,8 +146,10 @@ export function Header() {
               key={link.label}
               to={link.href}
               onClick={(e) => {
-                setIsMobileMenuOpen(false);
-                handleNavLinkClick(e, link.href);
+                handleNavLinkClick(e, link.href, true);
+                if (!link.href.startsWith('/#') && link.href !== '/') {
+                  setIsMobileMenuOpen(false);
+                }
               }}
               className="block text-lg font-medium text-sf-text-secondary hover:text-white transition-colors"
             >
