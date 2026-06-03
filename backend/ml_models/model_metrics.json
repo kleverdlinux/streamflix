@@ -1,0 +1,36 @@
+{
+  "svd": {
+    "rmse_cv": 0.9637758278675106,
+    "mae_cv": 0.7630483564286912,
+    "k_factors": 50,
+    "rmse_test": 0.8470223988051709,
+    "mae_test": 0.6587511886421747,
+    "precision_at_5": 0.4058569051580699,
+    "precision_at_10": 0.30505823627287854,
+    "recall_at_5": 0.16557151695301983,
+    "recall_at_10": 0.22434135399259272,
+    "ndcg_at_5": 0.47182749316935163,
+    "ndcg_at_10": 0.41645463157472085
+  },
+  "decision_tree": {
+    "f1_cv": 0.719788887129898,
+    "f1_cv_std": 0.003496258929756438,
+    "acc_cv": 0.6798794715615576
+  },
+  "random_forest": {
+    "f1_cv": 0.7277981285253372
+  },
+  "hybrid": {
+    "alpha": 0.6,
+    "improvement_vs_baseline_pct": 22.18525457576573
+  },
+  "dataset": {
+    "source": "MovieLens 1M + StreamFlix (Faker)",
+    "n_ratings_cf": 999611,
+    "n_users": 6040,
+    "n_movies": 3416
+  },
+  "export_date": "2026-05-16T16:40:19.933448",
+  "numpy_version": "2.0.2",
+  "backend": "scipy.sparse.linalg.svds"
+}
